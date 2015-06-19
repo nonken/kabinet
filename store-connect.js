@@ -1,6 +1,8 @@
 "usee strict";
 
 var React = require('react');
+var hoistNonReactStatics = require('hoist-non-react-statics');
+var _ = require('lodash');
 
 module.exports = function StoreConnect(def) {
     if (!def.storeProps)
@@ -8,7 +10,7 @@ module.exports = function StoreConnect(def) {
 
     var name = def.displayName || "";
 
-    return React.createClass({
+    var Wrapper = React.createClass({
 
         displayName: name + "StoreWrapper",
 
@@ -56,7 +58,10 @@ module.exports = function StoreConnect(def) {
         },
 
         render: function() {
-            return React.createElement( React.createClass(def), this.state );
+            console.log(React.createClass(def), 'hello');
+            return React.createElement(React.createClass(def), _.assign({}, this.props, this.state));
         }
     });
+
+    return hoistNonReactStatics(Wrapper, def);
 };
