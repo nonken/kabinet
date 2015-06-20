@@ -4,11 +4,11 @@ var React = require('react');
 var hoistNonReactStatics = require('hoist-non-react-statics');
 var _ = require('lodash');
 
-module.exports = function StoreConnect(def) {
-    if (!def.storeProps)
-        throw "You should now wrap a component without storeProps";
+module.exports = function StoreConnect(Component) {
+    if (!Component.storeProps)
+        throw "You should not wrap a component without storeProps, did you Componentine statics.storeProps?";
 
-    var name = def.displayName || "";
+    var name = Component.displayName || "";
 
     var Wrapper = React.createClass({
 
@@ -35,9 +35,9 @@ module.exports = function StoreConnect(def) {
         },
 
         _getStores: function(handle) {
-            return Object.keys(def.storeProps).map(function(key) {
+            return Object.keys(Component.storeProps).map(function(key) {
                 return {
-                    store: this.context.getStore(def.storeProps[key].store),
+                    store: this.context.getStore(Component.storeProps[key].store),
                     attribute: key,
                 };
             }, this);
@@ -58,10 +58,9 @@ module.exports = function StoreConnect(def) {
         },
 
         render: function() {
-            console.log(React.createClass(def), 'hello');
-            return React.createElement(React.createClass(def), _.assign({}, this.props, this.state));
+            return React.createElement(Component, _.assign({}, this.props, this.state));
         }
     });
 
-    return hoistNonReactStatics(Wrapper, def);
+    return hoistNonReactStatics(Wrapper, Component);
 };
