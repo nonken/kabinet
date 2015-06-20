@@ -1,8 +1,12 @@
 "use strict";
 
 function createStore(storeName, props) {
-    var ctor = function Store(state) {
-        state = state || {};
+    var ctor = function Store(dispatcher) {
+        //  @TDOO refactor. State can be passed into the constructor eventually
+        // Right now it is "dispatcher".
+        // state = state || {};
+        
+        var state = {};
 
         var listeners = {};
 
@@ -55,7 +59,7 @@ function createStore(storeName, props) {
                 }
             },
 
-            clearState: {
+            __clearState: {
                 value: function clearState() {
                     state = {};
 
@@ -75,6 +79,14 @@ function createStore(storeName, props) {
                     }.bind(this));
                 }
             },
+            
+            hydrate: {
+                value: function hydrate(newState){
+                    // @TODO this sets state in a undeterminate state
+                    // as newState can be anything.
+                    state = newState;
+                }
+            },
 
             dehydrate: {
                 value: function freezeState() {
@@ -89,13 +101,6 @@ function createStore(storeName, props) {
             },
         });
     };
-
-    Object.defineProperty(ctor, "hydrate", {
-        enumerable: true,
-        value: function thawState(state) {
-            return new ctor(JSON.parse(state));
-        }
-    });
 
     Object.defineProperty(ctor, "thaw", {
         enumerable: true,
@@ -132,6 +137,9 @@ function createStore(storeName, props) {
             });
         }
 
+        // @TODO
+        // Getters and setters directly on protoytpe: 
+        // Mabe a separate `state` boject is better. e.g. store.state.attr
         Object.defineProperty(proto, key, {
             enumerable: true,
             get: function() {
