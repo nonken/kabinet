@@ -1,159 +1,152 @@
 "use strict";
 
-function createStore(storeName, props) {
-    var ctor = function Store(dispatcher) {
-        //  @TDOO refactor. State can be passed into the constructor eventually
-        // Right now it is "dispatcher".
-        // state = state || {};
-        
-        var state = {};
+/**
+ * Shared prototype of all Stores, e.g. baseclass.
+ */
+var StoreStateBasePrototype = {
+    getState: function getState() {
+        return this.state;
+    },
 
-        var listeners = {};
+    observe: function(attr, handler) {
+        if (!this.__listeners[attr]) {
+            this.__listeners[attr] = [];
+        }
 
-        Object.defineProperties(this, {
-            observe: {
-                value: function(attr, handler) {
-                    if (!listeners[attr]) {
-                        listeners[attr] = [];
-                    }
+        this.__listeners[attr].push(handler);
+    },
 
-                    listeners[attr].push(handler);
-                }
+    stopObserving: function(attr, handler) {
+        if (!this.__listeners[attr])
+            throw "Fail to unbind " + attr + " for store " + this.storeName;
+
+        if (!this.__listeners[attr].indexOf(handler) > -1)
+            return console.warn("Attempt to unbind unitialize attr " + attr + " for store " + this.storeName);
+
+        this.__listeners[attr].splice(this.__listeners[attr].indexOf(handler));
+    },
+
+    hydrate: function hydrate(newState) {
+        for (var key in this.state) {
+            this.state[key] = newState[key];
+        }
+    },
+
+    dehydrate: function() {
+        return JSON.stringify(this.state);
+    },
+
+    __notify: function notifyStateChangeHandler(name, value, oldValue) {
+        if (!this.__listeners[name])
+            return;
+
+        this.__listeners[name].forEach(function(handler) {
+            handler(null, value, oldValue);
+        }.bind(this));
+    }
+};
+
+/**
+ * Encapsulate state in a "read-only" object.
+ */
+function createStoreState(props, observer) {
+    var state = {};
+
+    var keeper = Object.keys(props).reduce(function(stateKeeper, key) {
+        Object.defineProperty(stateKeeper, key, {
+            enumerable: true,
+            get: function() {
+                return state[key];
             },
 
-            stopObserving: {
-                value: function(attr, handler) {
-                    if (!listeners[attr])
-                        throw "Fail to unbind " + attr + " for store " + storeName;
+            set: function(val) {
+                var prevValue = state[key];
+                state[key] = val;
+                observer(key, val, prevValue);
+            }
+        });
 
-                    if (!listeners[attr].indexOf(handler) > -1)
-                        return console.warn("Attempt to unbind unitialize attr " + attr + " for store " + storeName);
+        return stateKeeper;
+    }, {});
 
-                    listeners[attr].splice(listeners[attr].indexOf(handler));
+    return Object.freeze(keeper);
+}
+
+
+function createStateProps(ctor, props) {
+    return Object.keys(props).reduce(function(StateProps, key) {
+        Object.defineProperty(StateProps, key, {
+            enumerable: true,
+            get: function() {
+                return {
+                    store: ctor,
+                    type: props[key].type,
+                };
+            }
+        });
+
+        return StateProps;
+    }, {});
+}
+
+function createStore(storeName, props) {
+    var ctor = function Store(dispatcher) {
+        var state, listeners = {};
+
+        // These gettes are the only ones
+        // to communicate internal state.
+        Object.defineProperties(this, {
+            __listeners: {
+                get: function() {
+                    return listeners;
                 }
             },
 
             state: {
                 ennumerable: true,
                 get: function() {
-                    return Object.keys(state).reduce(function(clone, key) {
-                        clone[key] = state[key];
-                        return clone;
-                    }, {});
-                }
-            },
+                    if (!state)
+                        state = createStoreState(props.stateProps, this.__notify.bind(this));
 
-            getState: {
-                // todo should go
-                value: function getState() {
-                    return this.state;
+                    return state;
                 }
-            },
-
-            __setState: {
-                value: function __setState(name, value) {
-                    // @todo should we "deepClone" value
-                    // to prevent action-at-a-distance?
-                    state[name] = value;
-                    this.notify(name);
-                }
-            },
-
-            __clearState: {
-                value: function clearState() {
-                    state = {};
-
-                    Object.keys(listeners).forEach(function(name) {
-                        this.notify(name);
-                    }.bind(this));
-                }
-            },
-
-            notify: {
-                value: function notifyOnStateChange(name) {
-                    if (!listeners[name])
-                        return;
-
-                    listeners[name].forEach(function(handler) {
-                        handler(null, state[name]);
-                    }.bind(this));
-                }
-            },
-            
-            hydrate: {
-                value: function hydrate(newState){
-                    // @TODO this sets state in a undeterminate state
-                    // as newState can be anything.
-                    state = newState;
-                }
-            },
-
-            dehydrate: {
-                value: function freezeState() {
-                    return this.freeze();
-                }
-            },
-
-            freeze: {
-                value: function freezeState() {
-                    return JSON.stringify(this.state);
-                }
-            },
+            }
         });
     };
 
-    Object.defineProperty(ctor, "thaw", {
-        enumerable: true,
-        value: function thawState(state) {
-            return new ctor(JSON.parse(state));
-        }
-    });
-
+    /**
+     * expose storeName, used as cache-key.
+     */
     Object.defineProperty(ctor, "storeName", {
         enumerable: true,
         value: storeName
     });
 
-    Object.keys(props).forEach(function(key) {
-        var value = props[key];
+    /**
+     * expose the StateProps meta object. StateProps describes the `state` of
+     * the store after instantiation.
+     */
+    ctor.StateProps = createStateProps(ctor, props.stateProps);
 
-        Object.defineProperty(ctor, key, {
-            get: function() {
-                return {
-                    store: ctor,
-                    type: value.type,
-                };
-            }
-        });
+    /**
+     * Assign StoreStateBasePrototype prototype to proto
+     */
+    ctor.prototype = Object.create(StoreStateBasePrototype);
+
+    /**
+     * Copy any other attributes of props, such as helpers/getters
+     */
+    Object.keys(props).forEach(function(key) {
+        if (ctor.prototype[key]) throw new Error("conflicting key found: " + key);
+        if (ctor[key]) return;
+        
+        
+
+        ctor.prototype[key] = props[key];
     });
 
-    ctor.prototype = Object.keys(props).reduce(function(proto, key) {
-        var value = props[key];
-
-        if (typeof value === 'function') {
-            return Object.defineProperty(proto, key, {
-                value: value,
-                enumerable: true,
-            });
-        }
-
-        // @TODO
-        // Getters and setters directly on protoytpe: 
-        // Mabe a separate `state` boject is better. e.g. store.state.attr
-        Object.defineProperty(proto, key, {
-            enumerable: true,
-            get: function() {
-                return this.state[key];
-            },
-
-            set: function(val) {
-                // todo, custom setter can be applied here
-                this.__setState(key, val);
-            }
-        });
-
-        return proto;
-    }, {});
+    // the prototype is now FINAL
+    Object.freeze(ctor.prototype);
 
     return ctor;
 }
