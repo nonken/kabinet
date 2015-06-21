@@ -5,8 +5,8 @@ var hoistNonReactStatics = require('hoist-non-react-statics');
 var _ = require('lodash');
 
 module.exports = function StoreConnect(Component) {
-    if (!Component.storeProps)
-        throw "You should not wrap a component without storeProps, did you Componentine statics.storeProps?";
+    if (!Component.stateProps)
+        throw "You should not wrap a component without stateProps, did you define statics.stateProps?";
 
     var name = Component.displayName || "";
 
@@ -35,9 +35,9 @@ module.exports = function StoreConnect(Component) {
         },
 
         _getStores: function(handle) {
-            return Object.keys(Component.storeProps).map(function(key) {
+            return Object.keys(Component.stateProps).map(function(key) {
                 return {
-                    store: this.context.getStore(Component.storeProps[key].store),
+                    store: this.context.getStore(Component.stateProps[key].store),
                     attribute: key,
                 };
             }, this);
