@@ -24,13 +24,13 @@ module.exports = function StoreConnect(Component) {
 
         componentDidMount: function componentDidMount() {
             this._getStores().forEach(function(kv) {
-                kv.store.observe(kv.attribute, this._onStoreChange);
+                kv.store.observe(kv.name, this._onStoreChange);
             }, this);
         },
 
         componentWillUnmount: function componentWillUnmount() {
             this._getStores().forEach(function(kv) {
-                kv.store.stopObserving(kv.attribute, this._onStoreChange);
+                kv.store.stopObserving(kv.name, this._onStoreChange);
             }, this);
         },
 
@@ -38,6 +38,7 @@ module.exports = function StoreConnect(Component) {
             return Object.keys(Component.stateProps).map(function(key) {
                 return {
                     store: this.context.getStore(Component.stateProps[key].store),
+                    name: Component.stateProps[key].name,
                     attribute: key,
                 };
             }, this);
@@ -52,7 +53,7 @@ module.exports = function StoreConnect(Component) {
 
         getStateFromStores: function() {
             return this._getStores().reduce(function(state, kv) {
-                state[kv.attribute] = kv.store.state[kv.attribute];
+                state[kv.attribute] = kv.store.state[kv.name];
                 return state;
             }.bind(this), {});
         },
