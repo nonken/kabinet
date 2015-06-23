@@ -19,8 +19,8 @@ var StoreStateBasePrototype = {
     stopObserving: function(attr, handler) {
         if (!this.__listeners[attr])
             throw "Fail to unbind " + attr + " for store " + this.storeName;
-
-        if (!this.__listeners[attr].indexOf(handler) > -1)
+            
+        if (!this.__listeners[attr].indexOf(handler) === -1)
             return console.warn("Attempt to unbind unitialize attr " + attr + " for store " + this.storeName);
 
         this.__listeners[attr].splice(this.__listeners[attr].indexOf(handler));
@@ -80,6 +80,7 @@ function createStateProps(ctor, props) {
             get: function() {
                 return {
                     store: ctor,
+                    name: key,
                     type: props[key].type,
                 };
             }
@@ -96,6 +97,11 @@ function createStore(storeName, props) {
         // These gettes are the only ones
         // to communicate internal state.
         Object.defineProperties(this, {
+            storeName: {
+                enumerable: true,
+                value: storeName
+            },
+
             __listeners: {
                 get: function() {
                     return listeners;
@@ -103,7 +109,7 @@ function createStore(storeName, props) {
             },
 
             state: {
-                ennumerable: true,
+                enumerable: true,
                 get: function() {
                     if (!state)
                         state = createStoreState(props.stateProps, this.__notify.bind(this));
