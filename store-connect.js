@@ -59,7 +59,7 @@ module.exports = function StoreConnect(Component) {
         },
 
         render: function() {
-            return React.createElement(Component, _.assign({}, this.props, this.state));
+            return React.createElement(Component, _.assign({ ref: "_store_connect_child"}, this.props, this.state));
         }
     });
 
