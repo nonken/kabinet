@@ -6,7 +6,7 @@ var _ = require('lodash');
 
 module.exports = function StoreConnect(Component) {
     if (!Component.stateProps)
-        throw "You should not wrap a component without stateProps, did you define statics.stateProps?";
+        throw new Error("You should not wrap a component without stateProps, did you define statics.stateProps?");
 
     var name = Component.displayName || "";
 
