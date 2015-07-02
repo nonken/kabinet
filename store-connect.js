@@ -36,11 +36,17 @@ module.exports = function StoreConnect(Component) {
 
         _getStores: function(handle) {
             return Object.keys(Component.stateProps).map(function(key) {
-                return {
+                var stores = {
                     store: this.context.getStore(Component.stateProps[key].store),
                     name: Component.stateProps[key].name,
-                    attribute: key,
+                    attribute: key
                 };
+                
+                if (Component.stateProps[key]._query) {
+                    stores._query = Component.stateProps[key]._query;
+                }
+                
+                return stores;
             }, this);
         },
 
@@ -53,7 +59,11 @@ module.exports = function StoreConnect(Component) {
 
         getStateFromStores: function() {
             return this._getStores().reduce(function(state, kv) {
-                state[kv.attribute] = kv.store.state[kv.name];
+                if (kv._query) {
+                    state[kv.attribute] = kv._query(kv.store, this.props);    
+                } else {
+                    state[kv.attribute] = kv.store.state[kv.name];
+                }
                 return state;
             }.bind(this), {});
         },

@@ -75,14 +75,21 @@ function createStoreState(props, observer) {
 
 function createStateProps(ctor, props) {
     return Object.keys(props).reduce(function(StateProps, key) {
+        
+        var properties = {
+            store: ctor,
+            name: key,
+            type: props[key].type,
+        };
+        
         Object.defineProperty(StateProps, key, {
             enumerable: true,
             get: function() {
-                return {
-                    store: ctor,
-                    name: key,
-                    type: props[key].type,
-                };
+                properties.query = function(done) {
+                    properties._query = done;
+                    return properties;
+                }
+                return properties;
             }
         });
 
