@@ -36,6 +36,9 @@ module.exports = function StoreConnect(Component) {
 
         _getStores: function(handle) {
             return Object.keys(Component.stateProps).map(function(key) {
+                if (!Component.stateProps[key]) {
+                    throw new Error("There is an error in the stateProps definition of component " + Component.displayName);
+                }
                 var stores = {
                     store: this.context.getStore(Component.stateProps[key].store),
                     name: Component.stateProps[key].name,
