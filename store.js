@@ -10,6 +10,12 @@ var StoreStateBasePrototype = {
         return this.state;
     },
 
+    clearState: function(){
+        for ( var key in this.state ){
+            this.state[key] = null;
+        }
+    },
+
     observe: function(attr, handler) {
         if (!this.__listeners[attr]) {
             this.__listeners[attr] = [];
