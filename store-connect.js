@@ -19,7 +19,7 @@ module.exports = function StoreConnect(Component) {
         },
 
         getInitialState: function() {
-            return this.getStateFromStores();
+            return this.getStateFromStores(this.props);
         },
 
         componentDidMount: function componentDidMount() {
@@ -34,8 +34,8 @@ module.exports = function StoreConnect(Component) {
             }, this);
         },
         
-        componentDidReceiveProps: function() {
-            this.setState(this.getStateFromStores());
+        componentWillReceiveProps: function(props) {
+            this.setState(this.getStateFromStores(props));
         },
 
         _getStores: function(handle) {
@@ -52,7 +52,7 @@ module.exports = function StoreConnect(Component) {
             if (!this.isMounted())
                 return;
 
-            this.setState(this.getStateFromStores());
+            this.setState(this.getStateFromStores(this.props));
         },
 
         getStateFromStores: function() {
