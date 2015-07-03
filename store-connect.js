@@ -39,17 +39,18 @@ module.exports = function StoreConnect(Component) {
                 if (!Component.stateProps[key]) {
                     throw new Error("There is an error in the stateProps definition of component " + Component.displayName);
                 }
-                var stores = {
+                
+                var properties = {
                     store: this.context.getStore(Component.stateProps[key].store),
                     name: Component.stateProps[key].name,
                     attribute: key
                 };
                 
                 if (Component.stateProps[key]._query) {
-                    stores._query = Component.stateProps[key]._query;
+                    properties._query = Component.stateProps[key]._query;
                 }
                 
-                return stores;
+                return properties;
             }, this);
         },
 
@@ -62,8 +63,9 @@ module.exports = function StoreConnect(Component) {
 
         getStateFromStores: function() {
             return this._getStores().reduce(function(state, kv) {
+                    console.log(kv.attribute)
                 if (kv._query) {
-                    state[kv.attribute] = kv._query(kv.store, this.props);    
+                    state[kv.attribute] = kv._query.call(this, kv.store, this.props); 
                 } else {
                     state[kv.attribute] = kv.store.state[kv.name];
                 }

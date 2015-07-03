@@ -1,5 +1,7 @@
 "use strict";
 
+var _ = require("lodash");
+
 /**
  * Shared prototype of all Stores, e.g. baseclass.
  */
@@ -90,6 +92,7 @@ function createStateProps(ctor, props) {
             enumerable: true,
             get: function() {
                 properties.query = function(done) {
+                    properties = _.clone(properties);
                     properties._query = done;
                     return properties;
                 }
@@ -157,8 +160,6 @@ function createStore(storeName, props) {
         if (ctor.prototype[key]) throw new Error("conflicting key found: " + key);
         if (ctor[key]) return;
         
-        
-
         ctor.prototype[key] = props[key];
     });
 
