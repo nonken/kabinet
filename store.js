@@ -44,10 +44,6 @@ var StoreStateBasePrototype = {
         return JSON.stringify(this.state);
     },
     
-    notify: function(name) {
-        this.__notify(name);
-    },
-
     __notify: function notifyStateChangeHandler(name, value, oldValue) {
         if (!this.__listeners[name])
             return;
