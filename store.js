@@ -41,7 +41,7 @@ var StoreStateBasePrototype = {
     },
 
     dehydrate: function() {
-        return JSON.stringify(this.state);
+        return this.state;
     },
     
     __notify: function notifyStateChangeHandler(name, value, oldValue) {
@@ -98,7 +98,7 @@ function createStateProps(ctor, props) {
                 properties.query = function(query) {
                     properties._query = query;
                     return properties;
-                }
+                };
                 return properties;
             }
         });
