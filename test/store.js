@@ -133,45 +133,6 @@ test("Store supports query function", function(assert) {
 
 });
 
-test("State can be queried using jsonPath", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: function() {},
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [{
-        username: "foo",
-        x: true
-    }, {
-        username: "bar"
-    }];
-
-    store.state.example = val;
-
-    var results = store.state.query("example", "$..username");
-
-
-    assert.deepEqual(results, ["foo", "bar"], "query returned results");
-
-    results = store.state.query("example", "$..bar");
-
-    assert.deepEqual(results, [], "query returned no results");
-
-    results = store.state.query("foo", "$..username");
-
-    assert.deepEqual(results, [], "query returned no results");
-
-    results = store.state.query("example", "$..[?(@.username=='foo')]");
-
-    assert.deepEqual(results, [val[0]], "got expected result");
-
-    assert.end();
-});
-
 test("State can be queried using a function", function(assert) {
     var Foo = Store.create("ExampleStore", {
         stateProps: {
@@ -198,31 +159,4 @@ test("State can be queried using a function", function(assert) {
     assert.deepEqual(results, [val[0]], "got expected result");
 
     assert.end();
-});
-
-test("State can be queried using jsonPath", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: ArrayType
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [{
-        username: "foo"
-    }, {
-        username: "bar"
-    }];
-
-
-    store.query("example", "_example", "$..[?(@.username=='bar')]");
-
-    store.observe("_example", function(key, results, orig) {
-        assert.deepEqual(results, [val[1]], "query returned results");
-        assert.end();
-    });
-
-    store.state.example = val;
 });
