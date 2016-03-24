@@ -132,31 +132,3 @@ test("Store supports query function", function(assert) {
         assert.end();
 
 });
-
-test("State can be queried using a function", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: function() {},
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [{
-        username: "foo",
-        x: true
-    }, {
-        username: "bar"
-    }];
-
-    store.state.example = val;
-
-    var results = store.state.query("example", function(key, value) {
-        return value.username === "foo";
-    });
-
-    assert.deepEqual(results, [val[0]], "got expected result");
-
-    assert.end();
-});

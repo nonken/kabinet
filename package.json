@@ -1,5 +1,5 @@
 {
-  "name": "kabinett",
+  "name": "kabinet",
   "version": "0.0.2",
   "description": "Observable key-value stores",
   "main": "index.js",
