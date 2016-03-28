@@ -127,6 +127,14 @@ test("Store supports query function", function(assert) {
     });
 
     store.state.example = val;
+    
+    console.log(store.state.get("example", 0));
+    
+    // assert.deepEqual(store.state.get("example", 0), store.state.example[0]);
+    
+    console.log(store.state);
+    
+    // console.log(store.state.get("example"));
 
     if (called == 2)
         assert.end();
