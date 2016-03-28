@@ -1,8 +1,61 @@
 # kabinet
 Observable key-value stores for flux apps
 
+## usage
 
-## introduction
+By lack of proper docs for now, the tests contain the best documentation.
+The follwong should give a rough idea of how it works:
+
+```javascript
+
+var Store = require("kabinet/store");
+var Keeper = require("kabinet/keeper");
+
+var TodoStore = Store.create("Todos", {
+    strict: true,
+    stateProps: {
+        todos: {
+            type: React.PropTypes.arrayOf(React.PropTypes.object),
+            default: [{
+                name: "Example project",
+                description: "Just a default project"
+            }],
+        }
+    }
+});
+
+// instantiate like a class:
+
+var store = new TodoStore();
+
+// somewhere in a component, instantiate trought keeper:
+
+var keeper = new Keeper();
+
+var store = keeper.getStore(TodoStore);
+
+todo.observe("todos", function(key, value, orig){
+    console.log("Updated %s with %s", key, value);
+});
+
+// somewhere in an action, keeper has a reference to the instance:
+// (pass the keeper as a singleton)
+
+var store = keeper.getStore(TodoStore);
+
+todo.state.push("todos", { name: "new project" });
+
+// on the serverside, flush the keepr:
+
+var json = JSON.stringify(Keeper.dehydrate());
+
+// on the clientside, keeper populates our stores on demand
+
+var keeper = new Keeper(json);
+
+```
+
+## background
 
 Kabinet introduces a event-less observable store implementation for flux apps,
 introducing flux-stores *without* the use of EventEmitter, based on the 
@@ -19,94 +72,3 @@ This implementation has the following advantages:
 - Simple unit tests can be used to test behaviour of methods
 - React compatible input validation
 
-Without *EventEmitter* the binding between stores, components and actions becomes
-explicit, making it easier to keep track of what code is acting on changes to your
-stores and removing the need for a global `Dispatcher` object. 
-
-Instead, we introduce the use of a singleton to manage stores, explicitly linked
-to the actual store implementation by passing around actual objects instead of
-strings.
-
-We believe events should not carry any data, thus implementing stores over events
-is an [anti-pattern](https://en.wikipedia.org/wiki/Anti-pattern) that should be 
-avoided when creating large and complex apps.
-
-## Usage
-
-### Implementing a simple store
-
-```javascript
-"use strict";
-
-var React = require("react");
-
-var Foo = Store.create("ExampleStore", {
-    stateProps: {
-        todos: {
-            type: React.PropTypes.arrayOf(React.PropTypes.shape({
-              message: React.PropTypes.string,
-              created: React.PropTypes.number
-            }))
-        }
-    },
-    
-    addTodo: function(message){
-        this.state.todos = [].concat(this.state.todos, {
-            message: message,
-            created: Date.now()
-        });
-    },
-    
-    getSortedByName: function(){
-        return _.sortBy(this.state.todos, "message");
-    },
-    
-    getSortedByDate: function(){
-        return _.sortBy(this.state.todos, "created");
-    }
-});
-
-
-test("instance foo", function(assert) {
-
-    var store = new Foo();
-
-    var store2 = new Foo();
-
-    store2.observe("example", function() {
-        assert.fail("should not happen");
-    });
-
-    store.observe("example", function() {
-        assert.end();
-    });
-
-    store.state.example = 1;
-
-});
-
-test("Store is observable", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: function() {},
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [1, 2, 3];
-
-    store.observe("example", function(key, update, orig) {
-        assert.deepEqual(update, val, "received updated value");
-        assert.equal(orig, undefined, "original was undefined");
-        assert.equal(key, "example", "got key back");
-        assert.end();
-    });
-
-    store.state.example = val;
-});
-
-
-
-```
