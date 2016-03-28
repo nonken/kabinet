@@ -3,9 +3,6 @@
   "version": "0.0.2",
   "description": "Observable key-value stores",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
     "test": "find | grep -v .c9 | grep _test.js | xargs tape"
   },
