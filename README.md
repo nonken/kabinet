@@ -4,7 +4,7 @@ Observable key-value stores for flux apps
 ## usage
 
 By lack of proper docs for now, the tests contain the best documentation.
-The follwong should give a rough idea of how it works:
+The following should give a rough idea of how it works:
 
 ```javascript
 

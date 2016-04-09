@@ -2,7 +2,7 @@
   "name": "kabinet",
   "version": "0.0.2",
   "description": "Observable key-value stores",
-  "main": "index.js",
+  "main": "store.js",
   "scripts": {
     "test": "find | grep -v .c9 | grep _test.js | xargs tape"
   },
