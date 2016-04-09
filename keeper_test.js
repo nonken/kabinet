@@ -1,14 +1,14 @@
 "use strict";
 
-var Store = require("../lib/store");
-var StoreKeeper = require("../lib/keeper");
+var Store = require("./store");
+var StoreKeeper = require("./keeper");
 var faker = require("faker");
 
 var test = require("tape");
 
 var MockType = function() {
     return;
-}
+};
 
 var MockStore = Store.create("mock", {
     stateProps: {

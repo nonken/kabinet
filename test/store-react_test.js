@@ -1,7 +1,7 @@
 "use strict";
 
 var test = require("tape");
-var Store = require("../lib/store");
+var Store = require("../store");
 var React = require("react");
 var sortBy = require("lodash/sortBy");
 var sinon = require("sinon");

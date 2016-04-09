@@ -1,8 +1,8 @@
 "use strict";
 
-var baseStore = require("./store/base");
-var metaStore = require("./store/meta");
-var createStoreState = require("./store/state");
+var baseStore = require("./lib/store/base");
+var metaStore = require("./lib/store/meta");
+var createStoreState = require("./lib/store/state");
 
 function createStore(storeName, props) {
     var ctor = function Store(dispatcher) {
