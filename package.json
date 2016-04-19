@@ -4,7 +4,7 @@
   "description": "Observable key-value stores",
   "main": "store.js",
   "scripts": {
-    "test": "find | grep -v .c9 | grep _test.js | xargs tape"
+    "test": "for i in `find | grep -v .c9 | grep _test.js`; do node $i; done"
   },
   "repository": {
     "type": "git",
