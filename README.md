@@ -32,7 +32,7 @@ store.setState("todos", [{title: "pick up laundry"}]);
 To implement the flux pattern, one will need to keep a reference to stores and
 attach observers during comonent lifecycle.
 
-(following is pseudo code, see [tests](./todo_test.js) for more examples)
+(following is pseudo code, see [tests](./store_test.js) for more examples)
 
 ```javascript
 
