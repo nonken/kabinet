@@ -1,57 +1,80 @@
 # kabinet
 Observable key-value stores for flux apps
 
-## usage
+# Installation
 
-By lack of proper docs for now, the tests contain the best documentation.
-The following should give a rough idea of how it works:
+`npm install kabinet`
+
+## Usage
+
+This simple example creates a store and attaches an observer
 
 ```javascript
 
-var Store = require("kabinet/store");
-var Keeper = require("kabinet/keeper");
+const Store = require("kabinet/store");
 
-var TodoStore = Store.create("Todos", {
-    strict: true,
-    stateProps: {
-        todos: {
-            type: React.PropTypes.arrayOf(React.PropTypes.object),
-            default: [{
-                name: "Example project",
-                description: "Just a default project"
-            }],
-        }
+let TodoStore = Store.create("TodoStore", {
+   todos: Array 
+});
+
+let store = new TodoStore();
+
+store.observe((state) => {
+    console.log(state); // { todos: ["pick up laundry"] }
+})
+
+store.setState("todos", [{title: "pick up laundry"}]);
+
+```
+
+## Advanced usage
+
+To implement the flux pattern, one will need to keep a reference to stores and
+attach observers during comonent lifecycle.
+
+(following is pseudo code, see [tests](./todo_test.js) for more examples)
+
+```javascript
+
+let React = require("react");
+let Store = require("kabinet/store");
+let Keeper = require("kabinet/keeper");
+
+/* /lib/store-keeper.js */
+let storeKeeper = new Keeper();
+
+module.exports = storeKeeper;
+
+/* /lib/store/todo */
+module.exports = Store.create("TodoList", {
+    todos: Array
+});
+
+/* inside your component, require storeKeeper and store */
+
+class TodoList extends React.component {
+    constructor(props) {
+        super(props);
+        this.state = {};
     }
-});
-
-// instantiate like a class:
-
-var store = new TodoStore();
-
-// somewhere in a component, instantiate trought keeper:
-
-var keeper = new Keeper();
-
-var store = keeper.getStore(TodoStore);
-
-todo.observe("todos", function(key, value, orig){
-    console.log("Updated %s with %s", key, value);
-});
-
-// somewhere in an action, keeper has a reference to the instance:
-// (pass the keeper as a singleton)
-
-var store = keeper.getStore(TodoStore);
-
-todo.state.push("todos", { name: "new project" });
-
-// on the serverside, flush the keepr:
-
-var json = JSON.stringify(Keeper.dehydrate());
-
-// on the clientside, keeper populates our stores on demand
-
-var keeper = new Keeper(json);
+    
+    componentDidMount() {
+        storeKeeper.getStore(TodoList).observe(this.setState.bind(this));
+    }
+    
+    componentWillUnmount() {
+        storeKeeper.getStore(TodoList).stopObserving(this.setState);
+    }
+    
+    render() {
+        if (!this.state.todos)
+            return <div>No todo items yet</div>;
+        
+        return {this.state.todos.map(todo) (
+            <TodoItem key={todo.id} todo={todo} />
+        )};
+    }
+};
 
 ```
 
@@ -66,7 +89,6 @@ concepts from the [object.observe shim](https://github.com/KapIT/observe-shim).
 
 This implementation has the following advantages:
 
-- Each store is an object that can have utility methods to deal with state
 - Stores can be used server-side without side-effects
 - Easy to reason about stores, as they are just a `require` away
 - Simple unit tests can be used to test behaviour of methods
