@@ -1,14 +1,14 @@
 {
   "name": "kabinet",
-  "version": "0.0.7",
+  "version": "0.2.0",
   "description": "Observable key-value stores",
-  "main": "store.js",
+  "main": "index.js",
   "scripts": {
     "test": "for i in `find | grep -v .c9 | grep _test.js`; do node $i; done"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cloud9ide/kabinet.git"
+    "url": "git+https://github.com/mvhenten/kabinet.git"
   },
   "keywords": [
     "flux",
@@ -18,17 +18,14 @@
   "author": "Matthijs van Henten <matthijs@c9.io>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cloud9ide/kabinet/issues"
+    "url": "https://github.com/mvhenten/kabinet/issues"
   },
-  "homepage": "https://github.com/cloud9ide/kabinet#readme",
+  "homepage": "https://github.com/mvhenten/kabinet#readme",
   "devDependencies": {
     "faker": "^3.0.1",
     "lodash": "^4.6.1",
     "react": "^0.14.7",
     "sinon": "^1.17.3",
     "tape": "^4.4.0"
-  },
-  "dependencies": {
-    "clone": "^1.0.2"
   }
 }

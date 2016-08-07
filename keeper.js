@@ -1,43 +1,59 @@
 "use strict";
 
-/**
- * Simple factory/cache
- */
-function StoreKeeper(storeData) {
-    var _stores = {};
+const State = new WeakMap();
 
-    storeData = storeData || {};
+let instance;
 
-    this.getStore = function(store, fluxContext) {
-        var storeName = store.storeName || store.name;
+class Keeper {
+    constructor(storage) {
+        State.set(this, {
+            storage: storage,
+            stores: new Map(),
+        });
+    }
 
-        fluxContext = fluxContext || {};
+    getStore(Store) {
+        let state = State.get(this);
 
-        if (!storeName) throw new Error("Store needs to have a name");
-        if (_stores[storeName]) return _stores[storeName];
+        if (!state.stores.has(Store)) {
+            let store = new Store();
 
-        var storeInstance = _stores[storeName] = new store();
-        storeInstance.context = fluxContext;
+            if (state.storage) {
+                store.setState(state.storage.get(Store.name));
+                store.observe((storeState) => {
+                    state.storage.set(Store.name, storeState);
+                });
+            }
 
+            state.stores.set(Store.name, store);
 
-        if (storeData[storeName])
-            storeInstance.hydrate(storeData[storeName]);
-
-        return storeInstance;
-    };
-
-    this.dehydrate = function() {
-        var data = {};
-        for (var name in _stores) {
-            data[name] = _stores[name].dehydrate();
         }
 
-        return data;
-    };
+        return state.stores.get(Store.name);
+    }
 
-    this.clear = function() {
-        _stores = {};
-    };
+    serialize() {
+        let state = State.get(this);
+
+        return state.stores.keys().reduce((o, k) => {
+            return Object.assign(o, {
+                [k]: state.stores.get(k)
+            });
+        }, {});
+
+    }
+}
+
+Keeper.initInstance = (storage) => {
+    instance = new Keeper(storage);
+    return instance;
 };
 
-module.exports = StoreKeeper;
+Keeper.getInstance = () => {
+    if (!instance)
+        instance = new Keeper();
+
+    return instance;
+};
+
+module.exports = Keeper;

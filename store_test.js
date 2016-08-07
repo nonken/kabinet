@@ -1,138 +1,160 @@
-#!/usr/bin/env node
+"use strict";
 
 var test = require("tape");
-var Store = require("./store");
 var sinon = require("sinon");
+var Store = require("./store");
 
-function ArrayType(val) {
-    if (!Array.isArray(val))
-        return new Error("noop");
-}
+test("Store.create", function(assert){
+    assert.equal(Store.create("TestStore").name, "TestStore", "It creates a named function");
 
-test("Creates a store object", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: function() {},
-            }
-        }
-    });
-
-    var store = new Foo();
-
-    store.state.example = [1, 2, 3];
-    assert.deepEqual(store.state.example, [1, 2, 3]);
+    assert.throws(() => {
+        Store.create(1);
+    }, /type of first argument "name" must be String/);
+    
+    assert.throws(() => {
+        Store.create("test", 33);
+    }, /type of second argument "storeProps" must be Object/);
 
     assert.end();
 });
 
-test("instance foo", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: function() {},
-            }
-        }
+test("Store.setState", function(assert){
+    let MyStore = Store.create("MyStore", {
+        things: Array
     });
+    
+    let store = new MyStore();
+    let things = [1,2,3];
 
-    var store = new Foo();
+    assert.deepEqual(store.getState(), {});
+    store.setState("things", things);
 
-    var store2 = new Foo();
+    assert.deepEqual(store.getState(), { things: things }, "Thing was stored");
+    
+    let copy = store.getState().things;
+    copy.push(42);
 
-    store2.observe("example", function() {
-        assert.fail("should not happen");
-    });
+    assert.deepEqual(store.getState(), { things: things }, "State was immutable");
+    
+    let thingsCloned = [].concat(things);
+    things.push(43);
 
-    store.observe("example", function() {
-        assert.end();
-    });
-
-    store.state.example = 1;
-
-});
-
-test("Store is observable", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        stateProps: {
-            example: {
-                type: function() {},
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [1, 2, 3];
-
-    store.observe("example", function(key, update, orig) {
-        assert.deepEqual(update, val, "received updated value");
-        assert.equal(orig, undefined, "original was undefined");
-        assert.equal(key, "example", "got key back");
-        assert.end();
-    });
-
-    store.state.example = val;
-});
-
-test("Store can be strict observable", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        strict: true,
-        stateProps: {
-            example: {
-                type: ArrayType
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [1, 2, 3];
-
-    store.observe("example", function(key, update, orig) {
-        assert.deepEqual(update, val, "received updated value");
-        assert.equal(orig, undefined, "original was undefined");
-        assert.equal(key, "example", "got key back");
-        assert.end();
-    });
-
-    store.state.example = 1;
-    store.state.example = val;
-});
-
-test("Store supports query function", function(assert) {
-    var Foo = Store.create("ExampleStore", {
-        strict: true,
-        stateProps: {
-            example: {
-                type: function(val) {
-                    if (!Array.isArray(val))
-                        return new Error("noop");
-                },
-            }
-        }
-    });
-
-    var store = new Foo();
-    var val = [1, 2, 3];
-
-    store.query("example", "_example", function(key, update, orig) {
-        return update[0];
-    });
-
-    var observer = sinon.stub();
-
-    store.observe("example", observer);
-    store.observe("_example", observer);
-
-    store.state.example = val;
-
-
-    assert.deepEqual(observer.getCall(0).args, ["_example", val[0], undefined]);
-    assert.deepEqual(observer.getCall(1).args, ["example", val, undefined]);
-
-    store.state.example = {};
-
-    assert.equal(observer.getCall(2), null);
-
+    assert.deepEqual(store.getState(), { things: thingsCloned }, "State is not a ref to the original");
+    
+    assert.throws(() => {
+        store.setState("things", {});
+    }, /TypeError: type of things must be Array, not object/, "State is typechecked");
+    
+    assert.throws(() => {
+        store.setState("others", {});
+    }, /unknown property "others" for MyStore/, "Cannot add unknown properties");
+    
+    let alt = new MyStore();
+    
+    assert.notDeepEqual(alt.getState(), store.getState(), "Stores don't share state");
+    
+    store.setState({ things: [] });
 
     assert.end();
+});
 
+test("Store.observe", function(assert){
+    let Test = Store.create("Test", {
+        count: Number
+    });
+
+    let store = new Test();
+    
+    let observer = sinon.spy();
+    
+    store.observe(observer);
+    
+    store.setState("count", 1);
+    
+    assert.ok(observer.calledOnce, "Observer was called");
+    
+    assert.ok(observer.calledWith({ count: 1 }));
+    
+    store.setState("count", 2);
+    
+    assert.ok(observer.calledWith({ count: 2 }));
+
+    assert.ok(observer.calledTwice, "Observer called twice");
+
+    assert.end();
+});
+
+test("Store.stopObserving", function(assert){
+    let Test = Store.create("Test", {
+        count: Number
+    });
+    
+    let store = new Test();
+    let observer = sinon.spy();
+    
+    store.observe(observer);
+    store.setState("count", 1);
+    
+    assert.ok(observer.calledOnce, "Observer was called");
+    
+    store.stopObserving(observer);
+    store.setState("count", 2);
+    assert.ok(observer.calledOnce, "Observer was not called again");
+    
+    store.stopObserving(observer);
+    assert.pass("Calling stopObserving again did not crash");
+    
+    assert.end();
+});
+
+test("Store.observers", function(assert){
+    let Test = Store.create("Test", {
+        count: Number
+    });
+    
+    let store = new Test();
+    let first = sinon.spy();
+    let second = sinon.spy();
+    
+    store.observe(first);
+    store.observe(second);
+    
+    store.setState("count", 2);
+
+    assert.ok(first.calledOnce, "First observer was called");
+    assert.ok(second.calledOnce, "Second observer was called");
+    
+    store.stopObserving(second);
+    
+    store.setState("count", 2);
+    
+    assert.ok(first.calledTwice, "First observer called again");
+    assert.ok(second.calledOnce, "Second observer was not called");
+
+    assert.end();    
+});
+
+test("Store.clearState", function(assert){
+    let Test = Store.create("Test", {
+        count: Number
+    });
+    
+    let store = new Test();
+    let observer = sinon.spy();
+    let count = Math.random();
+    
+    store.observe(observer);
+    store.setState("count", count);
+
+    assert.ok(observer.calledOnce, "Observer was called");
+    assert.ok(observer.calledWith({ count: count }));
+    assert.deepEqual(store.getState(), { count: count });
+    
+    store.clearState();
+    
+    assert.ok(observer.calledTwice, "Observer was called");
+    assert.ok(observer.calledWith({}));
+    assert.deepEqual(store.getState(), {});
+
+    assert.end();
 });
