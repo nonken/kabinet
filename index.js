@@ -1,4 +1,4 @@
 "use strict";
 
-module.exports.Store = require("./lib/store");
-module.exports.Keeper = require("./lib/keeper");
+module.exports.Store = require("./store");
+module.exports.Keeper = require("./keeper");
