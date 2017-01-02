@@ -35,12 +35,12 @@ class Keeper {
     serialize() {
         let state = State.get(this);
 
-        return state.stores.keys().reduce((o, k) => {
-            return Object.assign(o, {
-                [k]: state.stores.get(k)
-            });
-        }, {});
+        let serializedState = {};
+        for (let [name, store] of state.stores) {
+            serializedState[name] = store.getState();
+        }
 
+        return serializedState;
     }
 }
 
