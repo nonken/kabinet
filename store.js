@@ -6,7 +6,7 @@ const clone = (value) => {
     if (Array.isArray(value))
         return value.map(clone);
 
-    if (typeof value == "object")
+    if (value != null && typeof value == "object")
         return Object.keys(value).reduce((o, key) => {
             return Object.assign(o, {
                 [key]: clone(value[key])
@@ -50,10 +50,10 @@ const proto = {
     setState(name, value) {
         let state = State.get(this);
         let newState = name;
-        
+
         if (arguments.length == 2)
             newState = {[name]: value};
-        
+
         for (let key in newState) {
             if (!(key in state.storeProps))
                 throw new TypeError(`unknown property "${name}" for ${state.name}`);
