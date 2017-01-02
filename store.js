@@ -6,7 +6,7 @@ const clone = (value) => {
     if (Array.isArray(value))
         return value.map(clone);
 
-    if (typeof value == "object")
+    if (typeof value == "object" && value != null)
         return Object.keys(value).reduce((o, key) => {
             return Object.assign(o, {
                 [key]: clone(value[key])
