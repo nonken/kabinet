@@ -23,7 +23,7 @@
   "homepage": "https://github.com/mvhenten/kabinet#readme",
   "devDependencies": {
     "faker": "^3.0.1",
-    "lodash": "^4.6.1",
+    "lodash": "^4.17.4",
     "react": "^0.14.7",
     "sinon": "^1.17.3",
     "tape": "^4.4.0"
