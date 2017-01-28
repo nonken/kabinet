@@ -1,12 +1,13 @@
 "use strict";
 
 const State = new WeakMap();
+const _ = require('lodash');
 
 const clone = (value) => {
     if (Array.isArray(value))
         return value.map(clone);
 
-    if (value != null && typeof value == "object")
+    if (_.isPlainObject(value))
         return Object.keys(value).reduce((o, key) => {
             return Object.assign(o, {
                 [key]: clone(value[key])
