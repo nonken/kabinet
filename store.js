@@ -69,10 +69,10 @@ module.exports.create = function create(name = "StoreName", storeProps = {}) {
     check('first argument "name"', String, name);
     check('second argument "storeProps"', Object, storeProps);
 
-    const ctor = function() {
+    const ctor = function(state) {
         State.set(this, {
             name: name,
-            state: {},
+            state: state || {},
             observers: new Map(),
             storeProps: storeProps
         });
