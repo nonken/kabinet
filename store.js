@@ -36,7 +36,7 @@ const proto = {
     },
 
     observe(fn, scope) {
-        State.get(this).observers.set(fn, fn.bind(scope);
+        State.get(this).observers.set(fn, fn.bind(scope));
     },
 
     stopObserving(fn) {
