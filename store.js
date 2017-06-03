@@ -34,7 +34,7 @@ class Store {
         this.setDefaults();
     }
 
-    setDefaults = () => {
+    setDefaults() {
         let state = State.get(this);
         let defaultProps = this.constructor.defaultProps;
 
@@ -43,26 +43,26 @@ class Store {
         PropTypes.checkPropTypes(this.constructor.propTypes, defaultProps, 'store', state.name);
 
         this.setState(defaultProps);
-    };
+    }
 
-    getState = () => {
+    getState() {
         return clone(State.get(this).state);
-    };
+    }
 
-    observe = (fn, scope) => {
+    observe(fn, scope) {
         State.get(this).observers.set(fn, fn.bind(scope));
-    };
+    }
 
-    stopObserving = (fn) => {
+    stopObserving(fn) {
         State.get(this).observers.delete(fn);
-    };
+    }
 
-    clearState = () => {
+    clearState() {
         State.get(this).state = {};
         observers.call(this);
-    };
+    }
 
-    setState = (name, value) => {
+    setState(name, value) {
         const propTypes = this.constructor.propTypes;
 
         let state = State.get(this);
@@ -82,7 +82,7 @@ class Store {
         }
 
         observers.call(this);
-    };
+    }
 }
 
 module.exports = Store;
