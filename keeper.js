@@ -12,23 +12,28 @@ class Keeper {
         });
     }
 
-    getStore(Store) {
+    getStore(Store, identifier) {
         let state = State.get(this);
 
-        if (!state.stores.has(Store.name)) {
+        let name = Store.name;
+        if (identifier) {
+            name = `${Store.name}-${identifier}`;
+        }
+
+        if (!state.stores.has(name)) {
             let store = new Store();
 
             if (state.storage) {
-                store.setState(state.storage[Store.name]);
+                store.setState(state.storage[name]);
                 store.observe((storeState) => {
-                    state.storage[Store.name] = storeState;
+                    state.storage[name] = storeState;
                 });
             }
 
-            state.stores.set(Store.name, store);
+            state.stores.set(name, store);
         }
 
-        return state.stores.get(Store.name);
+        return state.stores.get(name);
     }
 
     dehydrate() {
