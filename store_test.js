@@ -6,7 +6,7 @@ const sinon = require("sinon");
 import { Store } from './store';
 import PropTypes from 'prop-types';
 
-test.skip("Store", function(assert){
+test("Store", function(assert){
     class TestStore extends Store {}
     const store = new TestStore();
 
@@ -15,6 +15,38 @@ test.skip("Store", function(assert){
     assert.equal(typeof store.clearState, 'function', 'clearState should be a function');
     assert.equal(typeof store.observe, 'function', 'observe should be a function');
     assert.equal(typeof store.stopObserving, 'function', 'stopObserving should be a function');
+
+    assert.end();
+});
+
+test('Store.defaultProps', function(assert) {
+    class TestStore extends Store {
+        static propTypes = {
+            things: PropTypes.array
+        };
+
+        static defaultProps = {
+            things: [1]
+        };
+    }
+
+    const store = new TestStore();
+    assert.deepEqual(store.getState().things, [1], 'default values get set');
+
+    class AltStore extends Store {
+        static propTypes = {
+            things: PropTypes.object
+        };
+
+        static defaultProps = {
+            things: [1]
+        };
+    }
+
+    let observer = sinon.spy(console, 'error');
+    const altStore = new AltStore();
+    assert.ok(observer.calledWith('Warning: Failed store type: Invalid store `things` of type `array` supplied to `AltStore`, expected `object`.'));
+    observer.restore();
 
     assert.end();
 });

@@ -30,7 +30,20 @@ export class Store {
             state: state || {},
             observers: new Map()
         });
+
+        this.setDefaults();
     }
+
+    setDefaults = () => {
+        let state = State.get(this);
+        let defaultProps = this.constructor.defaultProps;
+
+        if (!defaultProps) return;
+
+        PropTypes.checkPropTypes(this.constructor.propTypes, defaultProps, 'store', state.name);
+
+        this.setState(defaultProps);
+    };
 
     getState = () => {
         return clone(State.get(this).state);
