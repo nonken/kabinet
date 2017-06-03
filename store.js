@@ -23,7 +23,7 @@ function observers() {
     state.observers.forEach(fn => fn.call(null, this.getState()));
 }
 
-export class Store {
+class Store {
     constructor(state) {
         State.set(this, {
             name: this.constructor.name,
@@ -84,3 +84,5 @@ export class Store {
         observers.call(this);
     };
 }
+
+module.exports = Store;

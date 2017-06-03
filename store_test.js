@@ -3,8 +3,8 @@
 const test = require("tape");
 const sinon = require("sinon");
 
-import { Store } from './store';
-import PropTypes from 'prop-types';
+const Store = require('./store');
+const PropTypes = require('prop-types');
 
 test("Store", function(assert){
     class TestStore extends Store {}
