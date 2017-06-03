@@ -23,14 +23,14 @@ class Keeper {
         if (!state.stores.has(name)) {
             let store = new Store();
 
+            if (state.storage[name]) {
+                store.setState(state.storage[name]);
+            }
+
             if (state.storage) {
                 store.observe((storeState) => {
                     state.storage[name] = storeState;
                 });
-            }
-
-            if (state.storage[name]) {
-                store.setState(state.storage[name]);
             }
 
             state.stores.set(name, store);
