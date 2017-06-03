@@ -18,14 +18,6 @@ const clone = (value) => {
     return value;
 };
 
-const check = (name, type, value) => {
-    if (/^(Boolean|Number|String|RegExp|Array|Object|Date|Function)$/.test(type.name)) {
-        if (typeof value === type.name.toLowerCase()) return true;
-        if (_.isUndefined(value) || (value instanceof type)) return true;
-        throw new TypeError(`type of ${name} must be ${type.name}, not ${typeof value}`);
-    }
-};
-
 function observers() {
     let state = State.get(this);
     state.observers.forEach(fn => fn.call(null, this.getState()));
