@@ -1,6 +1,6 @@
 {
   "name": "kabinet",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Observable key-value stores",
   "main": "index.js",
   "scripts": {
