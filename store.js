@@ -2,7 +2,7 @@
 
 const State = new WeakMap();
 const _ = require('lodash');
-import PropTypes from 'prop-types';
+const PropTypes = require('prop-types');
 
 const clone = (value) => {
     if (Array.isArray(value))
