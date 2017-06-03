@@ -20,7 +20,7 @@ const clone = (value) => {
 const check = (name, type, value) => {
     if (/^(Boolean|Number|String|RegExp|Array|Object|Date|Function)$/.test(type.name)) {
         if (typeof value === type.name.toLowerCase()) return true;
-        if (!value || (value instanceof type)) return true;
+        if (_.isUndefined(value) || (value instanceof type)) return true;
         throw new TypeError(`type of ${name} must be ${type.name}, not ${typeof value}`);
     }
 };
