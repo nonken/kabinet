@@ -71,4 +71,4 @@ Keeper.getInstance = (storage) => {
     return instance;
 };
 
-module.exports = Keeper;
+module.exports.Keeper = Keeper;
