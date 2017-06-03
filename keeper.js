@@ -24,10 +24,13 @@ class Keeper {
             let store = new Store();
 
             if (state.storage) {
-                store.setState(state.storage[name]);
                 store.observe((storeState) => {
                     state.storage[name] = storeState;
                 });
+            }
+
+            if (state.storage[name]) {
+                store.setState(state.storage[name]);
             }
 
             state.stores.set(name, store);
